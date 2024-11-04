@@ -1,0 +1,45 @@
+### Get all trips
+GET {{URL}}/trips
+
+### Get trip by id
+GET {{URL}}/trips/3
+
+### Create a trip
+POST {{URL}}/trips
+Authorization: Bearer {{jwt_token}}
+Content-Type: application/json
+
+{
+   "start_time": "09:00",
+   "end_time": "15:30",
+   "start_position": "Times Square, New York",
+   "name": "New York City Tour",
+   "price": 15.5,
+   "category": "HISTORY"
+}
+
+### Update a trip
+PUT {{URL}}/trips/1
+Authorization: Bearer {{jwt_token}}
+Content-Type: application/json
+
+{
+   "start_time": "09:00",
+   "end_time": "12:30",
+   "start_position": "New York",
+   "name": "City Tour",
+   "price": 100.0,
+   "category": "SIGHTSEEING"
+}
+
+### Delete an trip
+DELETE {{URL}}/trips/4
+Authorization: Bearer {{jwt_token}}
+
+### Add an existing guide to and existing trip.
+PUT {{URL}}/trips/3/guides/1
+Authorization: Bearer {{jwt_token}}
+
+### Populate the database with trips and guides.
+POST {{URL}}/trips/populate
+Authorization: Bearer {{jwt_token}}
