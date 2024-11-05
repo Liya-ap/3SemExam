@@ -16,7 +16,6 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.MappingException;
 
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 public class TripController implements Controller {
@@ -65,19 +64,17 @@ public class TripController implements Controller {
     @Override
     public void getById(Context ctx) {
         try {
-            Long id = ctx.pathParamAsClass("id", Long.class).get();
+            Long id = validateId(ctx, "id");
 
             TripDTO foundTripDTO = tripService.getById(id);
-            String category = foundTripDTO.getCategory().name();
+            Category category = foundTripDTO.getCategory();
 
             Set<ItemDTO> itemsForTrip = apiService.getItemsByCategory(category);
             TripWithItemsDTO tripWithItemsDTO = new TripWithItemsDTO(foundTripDTO, itemsForTrip);
 
             ctx.status(HttpStatus.OK).json(tripWithItemsDTO, TripWithItemsDTO.class);
-        } catch (NoSuchElementException e) {
-            throw new BadRequestResponse("Id parameter is missing: " + e.getMessage());
-        } catch (ClassCastException | IllegalArgumentException e) {
-            throw new BadRequestResponse("Id parameter is not a Long: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestResponse(e.getMessage());
         } catch (EntityNotFoundException e) {
             throw new NotFoundResponse(e.getMessage());
         } catch (MappingException e) {
@@ -106,16 +103,14 @@ public class TripController implements Controller {
     @Override
     public void update(Context ctx) {
         try {
-            Long id = ctx.pathParamAsClass("id", Long.class).get();
+            Long id = validateId(ctx, "id");
             TripDTO tripDTO = ctx.bodyValidator(TripDTO.class).get();
 
             TripDTO updatedTripDTO = tripService.update(id, tripDTO);
 
             ctx.status(HttpStatus.OK).json(updatedTripDTO, TripDTO.class);
-        } catch (NoSuchElementException e) {
-            throw new BadRequestResponse("Id parameter is missing: " + e.getMessage());
-        } catch (ClassCastException | IllegalArgumentException e) {
-            throw new BadRequestResponse("Id parameter is not a Long: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestResponse(e.getMessage());
         } catch (ValidationException e) {
             String errorMessage = ExceptionFormatter.formatErrors(e.getErrors());
             throw new BadRequestResponse("Could not validate DTO class from json body:" + errorMessage);
@@ -131,14 +126,12 @@ public class TripController implements Controller {
     @Override
     public void delete(Context ctx) {
         try {
-            Long id = ctx.pathParamAsClass("id", Long.class).get();
+            Long id = validateId(ctx, "id");
             tripService.delete(id);
 
             ctx.status(HttpStatus.NO_CONTENT);
-        } catch (NoSuchElementException e) {
-            throw new BadRequestResponse("Id parameter is missing: " + e.getMessage());
-        } catch (ClassCastException | IllegalArgumentException e) {
-            throw new BadRequestResponse("Id parameter is not a Long: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestResponse(e.getMessage());
         } catch (EntityNotFoundException e) {
             throw new NotFoundResponse(e.getMessage());
         } catch (MappingException e) {
@@ -150,16 +143,14 @@ public class TripController implements Controller {
 
     public void addGuide(Context ctx) {
         try {
-            Long tripId = ctx.pathParamAsClass("tripId", Long.class).get();
-            Long guideId = ctx.pathParamAsClass("guideId", Long.class).get();
+            Long tripId = validateId(ctx, "tripId");
+            Long guideId = validateId(ctx, "guideId");
 
             tripService.addGuideToTrip(tripId, guideId);
 
             ctx.status(HttpStatus.NO_CONTENT);
-        } catch (NoSuchElementException e) {
-            throw new BadRequestResponse("Id parameter is missing: " + e.getMessage());
-        } catch (ClassCastException | IllegalArgumentException e) {
-            throw new BadRequestResponse("Id parameter is not a Long: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestResponse(e.getMessage());
         } catch (EntityNotFoundException e) {
             throw new NotFoundResponse(e.getMessage());
         } catch (MappingException e) {
@@ -188,16 +179,13 @@ public class TripController implements Controller {
 
     public void getByCategory(Context ctx) {
         try {
-            String categoryParam = ctx.pathParam("category");
+            Category category = validateCategory(ctx);
 
-            Category category = Category.fromString(categoryParam);
             Set<TripDTO> tripsByCategory = tripService.getByCategory(category);
 
             ctx.status(HttpStatus.OK).json(tripsByCategory, TripDTO.class);
-        } catch (NoSuchElementException e) {
-            throw new BadRequestResponse("Category parameter is missing: " + e.getMessage());
-        } catch (ClassCastException | IllegalArgumentException e) {
-            throw new BadRequestResponse("Category parameter is not a String: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestResponse(e.getMessage());
         } catch (EntityNotFoundException e) {
             throw new NotFoundResponse(e.getMessage());
         } catch (MappingException e) {
@@ -222,15 +210,13 @@ public class TripController implements Controller {
 
     public void getTripsByGuide(Context ctx) {
         try {
-            Long guideId = ctx.pathParamAsClass("guideId", Long.class).get();
+            Long guideId = validateId(ctx, "guideId");
 
             Set<TripDTO> tripDTOS = tripService.getTripsByGuide(guideId);
 
             ctx.status(HttpStatus.OK).json(tripDTOS, TripDTO.class);
-        } catch (NoSuchElementException e) {
-            throw new BadRequestResponse("Id parameter is missing: " + e.getMessage());
-        } catch (ClassCastException | IllegalArgumentException e) {
-            throw new BadRequestResponse("Id parameter is not a Long: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestResponse(e.getMessage());
         } catch (EntityNotFoundException e) {
             throw new NotFoundResponse(e.getMessage());
         } catch (MappingException e) {
@@ -242,15 +228,13 @@ public class TripController implements Controller {
 
     public void getItemsByTripAPI(Context ctx) {
         try {
-            String categoryParam = ctx.pathParam("category");
+            Category categoryParam = validateCategory(ctx);
 
             Set<ItemDTO> itemDTOSet = apiService.getItemsByCategory(categoryParam);
 
             ctx.status(HttpStatus.OK).json(itemDTOSet, ItemDTO.class);
-        } catch (NoSuchElementException e) {
-            throw new BadRequestResponse("Category parameter is missing: " + e.getMessage());
-        } catch (ClassCastException | IllegalArgumentException e) {
-            throw new BadRequestResponse("Category parameter is not a String: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestResponse(e.getMessage());
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -258,10 +242,10 @@ public class TripController implements Controller {
 
     public void getTotalWeight(Context ctx) {
         try {
-            Long id = ctx.pathParamAsClass("id", Long.class).get();
+            Long id = validateId(ctx, "id");
 
             TripDTO foundTripDTO = tripService.getById(id);
-            String category = foundTripDTO.getCategory().name();
+            Category category = foundTripDTO.getCategory();
 
             Set<ItemDTO> itemsForTrip = apiService.getItemsByCategory(category);
             TripWithItemsDTO tripWithItemsDTO = new TripWithItemsDTO(foundTripDTO, itemsForTrip);
@@ -271,16 +255,30 @@ public class TripController implements Controller {
             String weight = String.format("Total weight in grams: %.2f", totalWeight);
 
             ctx.status(HttpStatus.OK).json(weight, String.class);
-        } catch (NoSuchElementException e) {
-            throw new BadRequestResponse("Id parameter is missing: " + e.getMessage());
-        } catch (ClassCastException | IllegalArgumentException e) {
-            throw new BadRequestResponse("Id parameter is not a Long: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestResponse(e.getMessage());
         } catch (EntityNotFoundException e) {
             throw new NotFoundResponse(e.getMessage());
         } catch (MappingException e) {
             throw new BadRequestResponse("Could not map class: " + e.getMessage());
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    private Long validateId(Context ctx, String id) {
+        try {
+            return ctx.pathParamAsClass(id, Long.class).get();
+        } catch (RuntimeException e) {
+            throw new IllegalArgumentException("Invalid id format, expected a number", e);
+        }
+    }
+
+    private Category validateCategory(Context ctx) {
+        try {
+            return ctx.pathParamAsClass("category", Category.class).get();
+        } catch (RuntimeException e) {
+            throw new IllegalArgumentException("Invalid category format", e);
         }
     }
 }
