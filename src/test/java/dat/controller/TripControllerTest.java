@@ -78,11 +78,11 @@ class TripControllerTest {
         populatorTestUtil.cleanup(User.class);
         populatorTestUtil.cleanup(Role.class);
 
-        populatorTestUtil.cleanup(Guide.class);
         populatorTestUtil.cleanup(Trip.class);
+        populatorTestUtil.cleanup(Guide.class);
 
-        populatorTestUtil.resetSequence(Guide.class);
         populatorTestUtil.resetSequence(Trip.class);
+        populatorTestUtil.resetSequence(Guide.class);
     }
 
     @AfterAll
@@ -144,7 +144,8 @@ class TripControllerTest {
                 .then()
                 .statusCode(HttpStatus.OK.getCode())
                 .extract()
-                .jsonPath().getList(".", TripDTO.class);
+                .jsonPath()
+                .getList("$", TripDTO.class);
 
         assertThat(actual.size(), is(tripDTOList.size()));
         assertThat(actual, containsInAnyOrder(tripDTOList.toArray()));
@@ -200,5 +201,51 @@ class TripControllerTest {
                 .pathParam("id", tripDTO.getId())
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.getCode());
+    }
+
+    @Test
+    void addGuide() {
+        String token = SecurityTestUtil.loginAccount("User1", "1234");
+        TripDTO expectedTrip = tripDTOList.get(0);
+        GuideDTO expectedGuide = guidesDTOList.get(0);
+
+        given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .pathParam("tripId", expectedTrip.getId())
+                .pathParam("guideId", expectedGuide.getId())
+                .put("/trips/{tripId}/guides/{guideId}")
+                .then()
+                .statusCode(HttpStatus.NO_CONTENT.getCode());
+
+        given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .pathParam("tripId", expectedTrip.getId())
+                .pathParam("guideId", expectedGuide.getId())
+                .put("/trips/{tripId}/guides/{guideId}")
+                .then()
+                .statusCode(HttpStatus.CONFLICT.getCode());
+    }
+
+    @Test
+    void getByCategory() {
+
+    }
+
+    @Test
+    void getTotalPrice() {
+    }
+
+    @Test
+    void getTripsByGuide() {
+    }
+
+    @Test
+    void getItemsByTripAPI() {
+    }
+
+    @Test
+    void getTotalWeight() {
     }
 }
