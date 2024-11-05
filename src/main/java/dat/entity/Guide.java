@@ -1,6 +1,5 @@
 package dat.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -45,7 +44,7 @@ public class Guide {
     @OneToMany(mappedBy = "guide", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private Set<Trip> trips;
+    private Set<Trip> trips = new HashSet<>();
 
     public Guide(String firstName, String lastName, String email, String phone, Integer yearsOfExperience) {
         this.firstName = firstName;
@@ -53,7 +52,14 @@ public class Guide {
         this.email = email;
         this.phone = phone;
         this.yearsOfExperience = yearsOfExperience;
-        this.trips = new HashSet<>();
     }
 
+    public Guide(Long id, String firstName, String lastName, String email, String phone, Integer yearsOfExperience) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.phone = phone;
+        this.yearsOfExperience = yearsOfExperience;
+    }
 }
