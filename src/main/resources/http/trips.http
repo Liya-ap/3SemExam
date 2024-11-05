@@ -37,8 +37,17 @@ DELETE {{URL}}/trips/4
 Authorization: Bearer {{jwt_token}}
 
 ### Add an existing guide to and existing trip.
-PUT {{URL}}/trips/3/guides/1
+PUT {{URL}}/trips/2/guides/2
 Authorization: Bearer {{jwt_token}}
+
+### Get total price for each guide
+GET {{URL}}/trips/guides/totalprice
+
+### Get tours by category
+GET {{URL}}/trips/categories/CITY
+
+### Get tours by guide
+GET {{URL}}/trips/guides/1
 
 ### Populate the database with trips and guides.
 POST {{URL}}/trips/populate
