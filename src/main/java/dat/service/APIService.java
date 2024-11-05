@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dat.dto.ItemDTO;
+import dat.enums.Category;
 
 import java.io.IOException;
 import java.net.URI;
@@ -35,8 +36,8 @@ public class APIService {
         return instance;
     }
 
-    public Set<ItemDTO> getItemsByCategory(String category) {
-        String uri = String.format("https://packingapi.cphbusinessapps.dk/packinglist/%s", category.toLowerCase());
+    public Set<ItemDTO> getItemsByCategory(Category category) {
+        String uri = String.format("https://packingapi.cphbusinessapps.dk/packinglist/%s", category.name().toLowerCase());
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(uri))
