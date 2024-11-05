@@ -153,6 +153,8 @@ public class TripController implements Controller {
             throw new BadRequestResponse(e.getMessage());
         } catch (EntityNotFoundException e) {
             throw new NotFoundResponse(e.getMessage());
+        } catch (EntityExistsException e) {
+            throw new ConflictResponse(e.getMessage());
         } catch (MappingException e) {
             throw new BadRequestResponse("Could not map class: " + e.getMessage());
         } catch (Exception e) {
@@ -276,7 +278,8 @@ public class TripController implements Controller {
 
     private Category validateCategory(Context ctx) {
         try {
-            return ctx.pathParamAsClass("category", Category.class).get();
+            String category = ctx.pathParam("category");
+            return Category.fromString(category);
         } catch (RuntimeException e) {
             throw new IllegalArgumentException("Invalid category format", e);
         }
