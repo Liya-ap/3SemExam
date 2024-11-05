@@ -164,6 +164,11 @@ public class TripDAO implements IDAO<Trip, Long>, ITripGuideDAO {
             if (foundGuide == null)
                 throw new EntityNotFoundException(String.format("Guide with id %d not found", guideId));
 
+            if (foundGuide.getTrips().isEmpty())
+                throw new EntityNotFoundException(String.format("Guide with id %d has no trips", guideId));
+
+            foundGuide.getTrips().size(); // Load trips
+
             return foundGuide.getTrips();
         }
     }
