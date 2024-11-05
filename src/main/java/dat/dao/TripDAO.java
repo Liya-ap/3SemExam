@@ -39,8 +39,14 @@ public class TripDAO implements IDAO<Trip, Long>, ITripGuideDAO {
                 }
             }
 
-            if (trip.getGuide() != null)
-                trip.setGuide(em.find(Guide.class, trip.getGuide().getId()));
+            if (trip.getGuide() != null) {
+                Guide foundGuide = em.find(Guide.class, trip.getGuide().getId());
+
+                if (foundGuide == null)
+                    throw new EntityNotFoundException(String.format("Guide with id %d not found", trip.getGuide().getId()));
+
+                trip.setGuide(foundGuide);
+            }
 
             em.getTransaction().begin();
             em.persist(trip);
@@ -58,11 +64,10 @@ public class TripDAO implements IDAO<Trip, Long>, ITripGuideDAO {
                 if (foundTrip == null)
                     throw new EntityNotFoundException(String.format("Trip with id %d not found", id));
 
-                // Forces initialization if lazy loaded
                 Guide guide = foundTrip.getGuide();
 
                 if (guide != null) {
-                    guide.getTrips().size();
+                    foundTrip.setGuide(new Guide(guide.getId(), guide.getFirstName(), guide.getLastName(), guide.getEmail(), guide.getPhone(), guide.getYearsOfExperience()));
                 }
 
                 return foundTrip;
@@ -119,7 +124,7 @@ public class TripDAO implements IDAO<Trip, Long>, ITripGuideDAO {
         }
 
         @Override
-        public void delete (Long id){
+        public void delete(Long id){
             try (EntityManager em = emf.createEntityManager()) {
                 Trip foundTrip = em.find(Trip.class, id);
 
