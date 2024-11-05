@@ -8,8 +8,6 @@ import dat.entity.Guide;
 import dat.mapper.GuideMapper;
 import jakarta.persistence.EntityManagerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
