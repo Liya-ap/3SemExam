@@ -145,7 +145,7 @@ public class TripController implements Controller {
 
             tripService.addGuideToTrip(tripId, guideId);
 
-            ctx.status(HttpStatus.OK);
+            ctx.status(HttpStatus.NO_CONTENT);
         } catch (NoSuchElementException e) {
             throw new BadRequestResponse("Id parameter is missing: " + e.getMessage());
         } catch (ClassCastException | IllegalArgumentException e) {
@@ -164,11 +164,11 @@ public class TripController implements Controller {
         try {
             tripService.populate();
 
-            ctx.status(HttpStatus.OK);
+            ctx.status(HttpStatus.NO_CONTENT);
         } catch (EntityExistsException e) {
             throw new ConflictResponse(e.getMessage());
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundResponse(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestResponse(e.getMessage());
         } catch (MappingException e) {
             throw new BadRequestResponse("Could not map class: " + e.getMessage());
         } catch (Exception e) {
