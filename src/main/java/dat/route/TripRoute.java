@@ -28,6 +28,8 @@ public class TripRoute {
             get("/guides/totalprice", tripController::getTotalPrice, RouteRole.ANYONE);
             get("/categories/{category}", tripController::getByCategory, RouteRole.ANYONE);
             get("/guides/{guideId}", tripController::getTripsByGuide, RouteRole.ANYONE);
+            get("/items/{category}", tripController::getItemsByTripAPI, RouteRole.ANYONE);
+            get("/{id}/items/totalweight", tripController::getTotalWeight, RouteRole.ANYONE);
         };
     }
 }
