@@ -32,7 +32,7 @@ public class GuideDTO {
 
     @JsonIgnore
     @JsonBackReference
-    private Set<TripDTO> trips = new HashSet<>();;
+    private Set<TripDTO> trips = new HashSet<>();
 
     public GuideDTO(String firstName, String lastName, String email, String phone, Integer yearsOfExperience) {
         this.firstName = firstName;
