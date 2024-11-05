@@ -3,7 +3,6 @@ package dat.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import dat.entity.Guide;
 import dat.enums.Category;
 import lombok.*;
 
@@ -34,9 +33,9 @@ public class TripDTO {
 
     private Category category;
 
-    private Guide guide;
+    private GuideDTO guide;
 
-    public TripDTO(LocalTime startTime, LocalTime endTime, String startPosition, String name, Double price, Category category, Guide guide) {
+    public TripDTO(LocalTime startTime, LocalTime endTime, String startPosition, String name, Double price, Category category, GuideDTO guide) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.startPosition = startPosition;
