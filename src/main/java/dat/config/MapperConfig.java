@@ -1,10 +1,7 @@
 package dat.config;
 
-
 import dat.dto.GuideDTO;
-import dat.dto.TripDTO;
 import dat.entity.Guide;
-import dat.entity.Trip;
 import lombok.Getter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
@@ -19,13 +16,11 @@ public class MapperConfig {
 
     private MapperConfig() {
         modelMapper = new ModelMapper();
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STANDARD);
 
-        TypeMap<TripDTO, Trip> tripMapper = modelMapper.createTypeMap(TripDTO.class, Trip.class);
-        tripMapper.addMapping(TripDTO::getGuide, Trip::setGuide);
-
-        TypeMap<GuideDTO, Guide> guideDTOMapper = modelMapper.createTypeMap(GuideDTO.class, Guide.class);
-        guideDTOMapper.addMapping(GuideDTO::getTrips, Guide::setTrips);
+        //Guide to GuideDTO
+        TypeMap<Guide, GuideDTO> guideMapper = modelMapper.createTypeMap(Guide.class, GuideDTO.class);
+        guideMapper.addMapping(Guide::getTrips, GuideDTO::setTrips);
     }
 
     public static MapperConfig getInstance() {
