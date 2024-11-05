@@ -1,8 +1,11 @@
 package dat.controller;
 
+import dat.dto.ItemDTO;
 import dat.dto.PriceDTO;
 import dat.dto.TripDTO;
+import dat.dto.TripWithItemsDTO;
 import dat.enums.Category;
+import dat.service.APIService;
 import dat.service.GuideService;
 import dat.service.TripService;
 import dat.util.ExceptionFormatter;
@@ -22,10 +25,12 @@ public class TripController implements Controller {
 
     private final TripService tripService;
     private final GuideService guideService;
+    private final APIService apiService;
 
     private TripController(EntityManagerFactory emf) {
         this.tripService = TripService.getInstance(emf);
         this.guideService = GuideService.getInstance(emf);
+        this.apiService = APIService.getInstance();
     }
 
     public static TripController getInstance(EntityManagerFactory emf) {
@@ -61,9 +66,14 @@ public class TripController implements Controller {
     public void getById(Context ctx) {
         try {
             Long id = ctx.pathParamAsClass("id", Long.class).get();
-            TripDTO foundTripDTO = tripService.getById(id);
 
-            ctx.status(HttpStatus.OK).json(foundTripDTO, TripDTO.class);
+            TripDTO foundTripDTO = tripService.getById(id);
+            String category = foundTripDTO.getCategory().name();
+
+            Set<ItemDTO> itemsForTrip = apiService.getItemsByCategory(category);
+            TripWithItemsDTO tripWithItemsDTO = new TripWithItemsDTO(foundTripDTO, itemsForTrip);
+
+            ctx.status(HttpStatus.OK).json(tripWithItemsDTO, TripWithItemsDTO.class);
         } catch (NoSuchElementException e) {
             throw new BadRequestResponse("Id parameter is missing: " + e.getMessage());
         } catch (ClassCastException | IllegalArgumentException e) {
@@ -217,6 +227,50 @@ public class TripController implements Controller {
             Set<TripDTO> tripDTOS = tripService.getTripsByGuide(guideId);
 
             ctx.status(HttpStatus.OK).json(tripDTOS, TripDTO.class);
+        } catch (NoSuchElementException e) {
+            throw new BadRequestResponse("Id parameter is missing: " + e.getMessage());
+        } catch (ClassCastException | IllegalArgumentException e) {
+            throw new BadRequestResponse("Id parameter is not a Long: " + e.getMessage());
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundResponse(e.getMessage());
+        } catch (MappingException e) {
+            throw new BadRequestResponse("Could not map class: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public void getItemsByTripAPI(Context ctx) {
+        try {
+            String categoryParam = ctx.pathParam("category");
+
+            Set<ItemDTO> itemDTOSet = apiService.getItemsByCategory(categoryParam);
+
+            ctx.status(HttpStatus.OK).json(itemDTOSet, ItemDTO.class);
+        } catch (NoSuchElementException e) {
+            throw new BadRequestResponse("Category parameter is missing: " + e.getMessage());
+        } catch (ClassCastException | IllegalArgumentException e) {
+            throw new BadRequestResponse("Category parameter is not a String: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public void getTotalWeight(Context ctx) {
+        try {
+            Long id = ctx.pathParamAsClass("id", Long.class).get();
+
+            TripDTO foundTripDTO = tripService.getById(id);
+            String category = foundTripDTO.getCategory().name();
+
+            Set<ItemDTO> itemsForTrip = apiService.getItemsByCategory(category);
+            TripWithItemsDTO tripWithItemsDTO = new TripWithItemsDTO(foundTripDTO, itemsForTrip);
+
+            double totalWeight = tripWithItemsDTO.getItems().stream().mapToDouble(ItemDTO::getWeightInGrams).sum();
+
+            String weight = String.format("Total weight in grams: %.2f", totalWeight);
+
+            ctx.status(HttpStatus.OK).json(weight, String.class);
         } catch (NoSuchElementException e) {
             throw new BadRequestResponse("Id parameter is missing: " + e.getMessage());
         } catch (ClassCastException | IllegalArgumentException e) {
