@@ -12,7 +12,7 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @NamedQueries({
         @NamedQuery(name = "Trip.getAll", query = "SELECT t FROM Trip t"),
-        @NamedQuery(name = "Trip.getByCategory", query = "SELECT t FROM Trip t WHERE t.category = :category")
+        @NamedQuery(name = "Trip.getByCategory", query = "SELECT t FROM Trip t JOIN FETCH t.guide WHERE t.category = :category")
 })
 @Table(name = "trip")
 public class Trip {
