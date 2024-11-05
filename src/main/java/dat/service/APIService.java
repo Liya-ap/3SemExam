@@ -4,12 +4,8 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dat.dto.ItemDTO;
-import dat.enums.Category;
 
 import java.io.IOException;
 import java.net.URI;
@@ -19,17 +15,28 @@ import java.net.http.HttpResponse;
 import java.util.Set;
 
 public class APIService {
-    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private static APIService instance;
+
+    private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
-    public APIService(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    private APIService() {
+        this.httpClient = HttpClient.newHttpClient();
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.registerModule(new JavaTimeModule());
+        this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
-    public Set<ItemDTO> getItemsByTrip(Category category) {
-        String uri = String.format("https://packingapi.cphbusinessapps.dk/packinglist/%s", category);
+    public static APIService getInstance() {
+        if (instance == null) {
+            instance = new APIService();
+        }
+
+        return instance;
+    }
+
+    public Set<ItemDTO> getItemsByCategory(String category) {
+        String uri = String.format("https://packingapi.cphbusinessapps.dk/packinglist/%s", category.toLowerCase());
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(uri))
@@ -40,16 +47,20 @@ public class APIService {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
-                JavaType classType = objectMapper.getTypeFactory().constructCollectionType(Set.class, ItemDTO.class);
                 JsonNode jsonNode = objectMapper.readTree(response.body());
-                JsonNode results = jsonNode.get("items");
+                JsonNode itemsNode = jsonNode.get("items");
 
-                return objectMapper.treeToValue(results, classType);
+                if (itemsNode != null && itemsNode.isArray()) {
+                    JavaType javaType = objectMapper.getTypeFactory().constructCollectionType(Set.class, ItemDTO.class);
+                    return objectMapper.treeToValue(itemsNode, javaType);
+                } else {
+                    throw new RuntimeException("Missing or invalid 'items' field in API response");
+                }
+            } else {
+                throw new RuntimeException("Failed to fetch items from API, status code: " + response.statusCode());
             }
-        } catch (InterruptedException | IOException e) {
-            e.printStackTrace();
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException("Failed to fetch items from API", e);
         }
-
-        return null;
     }
 }
