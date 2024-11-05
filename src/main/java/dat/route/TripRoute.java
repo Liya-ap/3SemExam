@@ -27,6 +27,7 @@ public class TripRoute {
             post("/populate", tripController::populate, RouteRole.USER, RouteRole.ADMIN);
             get("/guides/totalprice", tripController::getTotalPrice, RouteRole.ANYONE);
             get("/categories/{category}", tripController::getByCategory, RouteRole.ANYONE);
+            get("/guides/{guideId}", tripController::getTripsByGuide, RouteRole.ANYONE);
         };
     }
 }
