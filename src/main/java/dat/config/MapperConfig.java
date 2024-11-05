@@ -4,6 +4,7 @@ import dat.dto.GuideDTO;
 import dat.entity.Guide;
 import lombok.Getter;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
 import org.modelmapper.TypeMap;
 import org.modelmapper.convention.MatchingStrategies;
 
@@ -18,9 +19,14 @@ public class MapperConfig {
         modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STANDARD);
 
-        //Guide to GuideDTO
-        TypeMap<Guide, GuideDTO> guideMapper = modelMapper.createTypeMap(Guide.class, GuideDTO.class);
-        guideMapper.addMapping(Guide::getTrips, GuideDTO::setTrips);
+        TypeMap<Guide, GuideDTO> guideTypeMap = modelMapper.createTypeMap(Guide.class, GuideDTO.class);
+        guideTypeMap.addMappings(new PropertyMap<Guide, GuideDTO>() {
+            @Override
+            protected void configure() {
+                skip(destination.getTrips());  // Skip the trips field
+            }
+        });
+
     }
 
     public static MapperConfig getInstance() {
