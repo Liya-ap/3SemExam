@@ -1,9 +1,9 @@
 package dat.dto;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import dat.entity.Trip;
 import lombok.*;
 
 import java.util.HashSet;
@@ -31,7 +31,8 @@ public class GuideDTO {
     private Integer yearsOfExperience;
 
     @JsonIgnore
-    private Set<Trip> trips;
+    @JsonBackReference
+    private Set<TripDTO> trips = new HashSet<>();;
 
     public GuideDTO(String firstName, String lastName, String email, String phone, Integer yearsOfExperience) {
         this.firstName = firstName;
@@ -39,6 +40,5 @@ public class GuideDTO {
         this.email = email;
         this.phone = phone;
         this.yearsOfExperience = yearsOfExperience;
-        this.trips = new HashSet<>();
     }
 }
