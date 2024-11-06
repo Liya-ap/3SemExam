@@ -6,6 +6,7 @@ import dat.config.AppConfig;
 import dat.config.HibernateConfig;
 import dat.dto.GuideDTO;
 import dat.dto.TripDTO;
+import dat.dto.TripWithItemsDTO;
 import dat.entity.Guide;
 import dat.entity.Trip;
 import dat.enums.Category;
@@ -124,16 +125,17 @@ class TripControllerTest {
     void getById() {
         TripDTO expected = tripDTOList.get(0);
 
-        TripDTO actual = given()
+        TripWithItemsDTO actual = given()
                 .pathParam("id", expected.getId())
                 .when()
                 .get("/trips/{id}")
                 .then()
                 .statusCode(HttpStatus.OK.getCode())
                 .extract()
-                .as(TripDTO.class);
+                .as(TripWithItemsDTO.class);
 
-        assertThat(actual, is(expected));
+        assertThat(actual.getTrip(), is(expected));
+        assertThat(actual.getItems().size(), is(5));
     }
 
     @Test
@@ -184,7 +186,7 @@ class TripControllerTest {
 
     @Test
     void delete() {
-        String token = SecurityTestUtil.loginAccount("User1", "1234");
+        String token = SecurityTestUtil.loginAccount("Admin1", "1234");
         TripDTO tripDTO = tripDTOList.get(0);
 
         given()
