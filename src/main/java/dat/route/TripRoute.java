@@ -22,9 +22,9 @@ public class TripRoute {
             get("/{id}", tripController::getById, RouteRole.ANYONE);
             post("/", tripController::create, RouteRole.USER, RouteRole.ADMIN);
             put("/{id}", tripController::update, RouteRole.USER, RouteRole.ADMIN);
-            delete("/{id}", tripController::delete, RouteRole.USER, RouteRole.ADMIN);
+            delete("/{id}", tripController::delete, RouteRole.ADMIN);
             put("/{tripId}/guides/{guideId}", tripController::addGuide, RouteRole.USER, RouteRole.ADMIN);
-            post("/populate", tripController::populate, RouteRole.USER, RouteRole.ADMIN);
+            post("/populate", tripController::populate, RouteRole.ADMIN);
             get("/guides/totalprice", tripController::getTotalPrice, RouteRole.ANYONE);
             get("/categories/{category}", tripController::getByCategory, RouteRole.ANYONE);
             get("/guides/{guideId}", tripController::getTripsByGuide, RouteRole.ANYONE);
