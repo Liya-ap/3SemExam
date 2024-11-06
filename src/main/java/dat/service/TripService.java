@@ -1,6 +1,6 @@
 package dat.service;
 
-import dat.Populator;
+import dat.util.Populator;
 import dat.dao.TripDAO;
 import dat.dto.TripDTO;
 import dat.entity.Trip;
